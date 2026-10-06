@@ -1,0 +1,123 @@
+MiraiGames - fase 1: configuracion inicial
+==========================================
+
+Que hemos creado
+----------------
+
+Se ha preparado el esqueleto inicial del proyecto, sin implementar
+funcionalidades de tienda:
+
+- frontend/: proyecto React generado con Vite, sus archivos de entrada y
+  configuracion de desarrollo.
+- backend/: estructura inicial para PHP. index.php contiene solo la etiqueta
+  PHP de apertura; no hay rutas ni logica de API.
+- database/mirai_games.sql: archivo vacio reservado para el diseno del esquema
+  en la siguiente fase.
+- docs/ y tests/: carpetas preparadas para documentacion y pruebas futuras.
+- README.md: instrucciones iniciales y descripcion de las tecnologias y estado.
+- .gitignore: exclusiones de dependencias, compilaciones y configuracion local.
+
+El contenido de ejemplo de la plantilla de Vite se ha sustituido por una pantalla
+temporal minima con el nombre del proyecto. No es una pagina de tienda. Los
+archivos .gitkeep mantienen en Git las carpetas que aun estan vacias.
+
+Para que sirve cada carpeta principal
+-------------------------------------
+
+- frontend/src/components/: componentes reutilizables de interfaz que se creen
+  mas adelante.
+- frontend/src/pages/: paginas de la aplicacion cuando se implementen.
+- frontend/src/services/: comunicacion HTTP con el backend.
+- frontend/src/hooks/: hooks compartidos de React, si hacen falta.
+- frontend/src/context/: estado compartido de React cuando el proyecto lo
+  necesite.
+- frontend/src/assets/: imagenes, iconos y otros recursos del frontend.
+- backend/config/: configuracion local del backend y conexion a base de datos.
+- backend/controllers/: tratamiento de las solicitudes y coordinacion de
+  operaciones.
+- backend/models/: acceso a datos y consultas relacionadas con el dominio.
+- backend/routes/: definicion de rutas de la API.
+- database/: scripts SQL de creacion y evolucion del esquema.
+- docs/: documentacion complementaria del proyecto.
+- tests/: pruebas automatizadas que se incorporen durante el desarrollo.
+
+Por que React + Vite
+--------------------
+
+React permite construir la interfaz con componentes y JavaScript, una tecnologia
+que el desarrollador ya conoce. Vite proporciona una configuracion de desarrollo
+rapida y una compilacion sencilla, sin obligarnos a incorporar un framework
+adicional. Esta combinacion mantiene el frontend pequeno y adecuado para el
+plazo de ocho semanas.
+
+Por que separar frontend y backend
+----------------------------------
+
+El frontend se ocupa de presentar la interfaz y recoger las acciones del usuario.
+El backend PHP sera responsable de validar las solicitudes, aplicar reglas de
+negocio y acceder a los datos. Separarlos hace mas claras esas responsabilidades
+y evita exponer la base de datos al navegador, sin introducir una arquitectura
+mas compleja de la necesaria.
+
+Como se comunicara React con PHP
+--------------------------------
+
+React enviara solicitudes HTTP a rutas que empiecen por /api y recibira respuestas
+en JSON. Durante el desarrollo, el proxy de Vite definido en vite.config.js
+reenviara /api a http://127.0.0.1:8000. Esto evita configurar una direccion
+distinta de API en cada pantalla y facilita el desarrollo local.
+
+La API todavia no existe: backend/index.php esta vacio salvo por la etiqueta
+inicial de PHP. Cuando implementemos el backend decidiremos el formato de errores,
+los metodos HTTP y las rutas concretas. En produccion, frontend y API podran
+publicarse bajo el mismo dominio o conectarse mediante un proxy inverso; si se
+usan dominios diferentes, habra que configurar CORS de forma limitada.
+
+Funcion de MySQL
+----------------
+
+MySQL almacenara de forma persistente la informacion del proyecto. PHP sera el
+unico componente que se conecte a la base de datos, usando PDO; React nunca
+accedera directamente a MySQL. El archivo database/mirai_games.sql esta vacio
+intencionadamente. Las tablas, relaciones y restricciones se disenaran y
+documentaran en la siguiente fase, antes de implementar funcionalidades que
+dependan de ellas.
+
+Dependencias instaladas
+-----------------------
+
+Dependencias de ejecucion:
+- react: permite construir la interfaz mediante componentes.
+- react-dom: conecta React con el DOM del navegador.
+
+Dependencias de desarrollo:
+- vite: servidor local de desarrollo y herramienta de compilacion.
+- @vitejs/plugin-react: integra React con Vite.
+
+No se han instalado dependencias para enrutamiento, estilos, peticiones HTTP,
+estado global o pruebas. fetch forma parte del navegador y sera suficiente para
+las solicitudes HTTP iniciales. Tampoco se requiere una biblioteca PHP para
+esta fase. Node.js y npm son necesarios para ejecutar las herramientas frontend;
+PHP y MySQL se necesitaran en las fases de backend y base de datos.
+
+Estado y ejecucion
+------------------
+
+Para instalar dependencias del frontend desde la carpeta frontend:
+
+    npm install
+
+Para iniciar el servidor local de Vite:
+
+    npm run dev
+
+Para comprobar la compilacion:
+
+    npm run build
+
+El proxy presupone que en una fase posterior se ejecutara el backend en
+127.0.0.1:8000. En este entorno no esta disponible el comando PHP, por lo que
+todavia no es posible ejecutar ni validar el backend.
+
+No se han creado componentes ni paginas de la tienda, funcionalidades de usuario,
+carrito, pedidos, API, tablas SQL ni credenciales de base de datos.
