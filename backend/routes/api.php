@@ -51,10 +51,10 @@ return [
     'POST /api/cart/items' => static function (): array {
         return addCartItem();
     },
-    'PATCH /api/cart/items/{game_id}' => static function (array $parameters): array {
+    'PATCH /api/cart/items/{id}' => static function (array $parameters): array {
         return updateCartItem($parameters);
     },
-    'DELETE /api/cart/items/{game_id}' => static function (array $parameters): array {
+    'DELETE /api/cart/items/{id}' => static function (array $parameters): array {
         return removeCartItem($parameters);
     },
     'POST /api/checkout/session' => static function (): array {
