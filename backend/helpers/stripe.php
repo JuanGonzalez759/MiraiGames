@@ -10,8 +10,17 @@ if (is_file($stripeAutoload)) {
     require_once $stripeAutoload;
 }
 
+function requireStripePaymentsEnabled(): void
+{
+    if (getenv('APP_ENV') === 'test') {
+        throw new HttpException(503, 'Stripe payments are disabled in the test environment.');
+    }
+}
+
 function stripeClient(): \Stripe\StripeClient
 {
+    requireStripePaymentsEnabled();
+
     if (!class_exists(\Stripe\StripeClient::class) || !extension_loaded('curl')) {
         throw new HttpException(503, 'Stripe payments are not available on this server.');
     }

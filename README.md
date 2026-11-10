@@ -82,6 +82,82 @@ inicia Vite en otra terminal dentro de `frontend/` y abre
 modifican datos requieren el token CSRF obtenido en la primera ruta y un usuario
 autenticado cuando se trata del carrito.
 
+### Backend con una base de pruebas independiente
+
+El backend normal carga `backend/.env`; el cargador conserva las variables que
+ya existian en el proceso, por lo que las variables del proceso prevalecen.
+Para un proceso de pruebas, inicia PHP desde una terminal PowerShell separada y
+define en esa terminal `APP_ENV=test` y `MYSQL_DATABASE=mirai_games_test`.
+Cuando `APP_ENV` vale exactamente `test`, `databaseConnection()` exige que
+`MYSQL_DATABASE` exista y sea exactamente `mirai_games_test`; de lo contrario,
+lanza una excepcion antes de abrir una conexion. En este modo nunca aplica el
+valor predeterminado `mirai_games`. `APP_ENV=development` y la ausencia de
+`APP_ENV` conservan el modo normal; cualquier otro valor se rechaza antes de
+crear PDO.
+
+Configura tambien `MYSQL_HOST`, `MYSQL_PORT`, `MYSQL_USER` y `MYSQL_PASSWORD`
+para la instancia de pruebas. No pongas la contrasena en comandos guardados,
+scripts ni archivos versionados. Ejecuta este bloque desde la raiz del
+repositorio. Calcula y valida esa ruta, restaura las variables que ya existian
+en la terminal (incluidas las que estaban sin definir) y solicita la contrasena
+de forma segura. No inicies Vite en esta fase; su proxy habitual apunta al
+backend normal del puerto 8000.
+
+```powershell
+$projectRoot = (Resolve-Path '.').Path
+if (-not (Test-Path (Join-Path $projectRoot 'backend\index.php'))) {
+    throw 'Ejecuta este bloque desde la raiz del repositorio MiraiGames.'
+}
+
+$environmentNames = @(
+    'APP_ENV', 'MYSQL_DATABASE', 'MYSQL_HOST', 'MYSQL_PORT',
+    'MYSQL_USER', 'MYSQL_PASSWORD', 'APP_ORIGIN'
+)
+$originalEnvironment = @{}
+foreach ($name in $environmentNames) {
+    $item = Get-Item -Path "Env:$name" -ErrorAction SilentlyContinue
+    $originalEnvironment[$name] = if ($null -eq $item) { $null } else { $item.Value }
+}
+
+try {
+    $env:APP_ENV = 'test'
+    $env:MYSQL_DATABASE = 'mirai_games_test'
+    $env:MYSQL_HOST = '127.0.0.1'
+    $env:MYSQL_PORT = '3306'
+    $env:MYSQL_USER = Read-Host 'Usuario MySQL de pruebas'
+
+    $securePassword = Read-Host 'Contrasena MySQL de pruebas' -AsSecureString
+    $passwordPointer = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($securePassword)
+    try {
+        $env:MYSQL_PASSWORD = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($passwordPointer)
+    } finally {
+        [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($passwordPointer)
+        $securePassword.Dispose()
+    }
+
+    $env:APP_ORIGIN = 'http://127.0.0.1:5174'
+    Set-Location $projectRoot
+    php -S 127.0.0.1:8001 -t backend backend/index.php
+} finally {
+    foreach ($name in $environmentNames) {
+        if ($null -eq $originalEnvironment[$name]) {
+            Remove-Item -Path "Env:$name" -ErrorAction SilentlyContinue
+        } else {
+            Set-Item -Path "Env:$name" -Value $originalEnvironment[$name]
+        }
+    }
+}
+```
+
+Antes de usarlo, prepara `mirai_games_test` por separado con el esquema
+necesario. No ejecutes migraciones ni pruebas contra `mirai_games`. El guard
+del backend impide que este proceso use esa base aunque `backend/.env` la
+defina o aunque falte `MYSQL_DATABASE`. En `APP_ENV=test` los endpoints que
+inician o reanudan Checkout se rechazan antes de crear pedidos o reservas; el
+cliente Stripe tambien queda bloqueado, lo que impide llamadas externas desde
+el recuperador. El webhook no se ha modificado. El puerto `8001` distingue el
+servidor de pruebas del servidor normal.
+
 ## Stripe Checkout en modo de pruebas
 
 El backend usa el SDK oficial `stripe/stripe-php`. En `backend/`, instala las

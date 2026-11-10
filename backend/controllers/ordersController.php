@@ -10,6 +10,7 @@ require_once __DIR__ . '/../models/ordersModel.php';
 function createCheckoutSession(): array
 {
     $userId = requireOrderUserId();
+    requireStripePaymentsEnabled();
     $idempotencyKey = $_SERVER['HTTP_IDEMPOTENCY_KEY'] ?? '';
 
     if (
@@ -37,6 +38,7 @@ function createCheckoutSession(): array
 function resumeOrderCheckout(array $parameters): array
 {
     $userId = requireOrderUserId();
+    requireStripePaymentsEnabled();
     $orderId = validateOrderId($parameters['id'] ?? null);
     $connection = databaseConnection();
     $order = findCheckoutOrderById($connection, $orderId, $userId);

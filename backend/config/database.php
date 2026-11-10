@@ -4,9 +4,33 @@ declare(strict_types=1);
 
 function databaseConnection(): PDO
 {
+    $environment = getenv('APP_ENV');
+    $configuredDatabase = getenv('MYSQL_DATABASE');
+
+    if ($environment === false) {
+        $environment = 'development';
+    }
+
+    if (!in_array($environment, ['development', 'test'], true)) {
+        throw new PDOException(
+            'APP_ENV must be either development or test.'
+        );
+    }
+
+    if ($environment === 'test') {
+        if ($configuredDatabase !== 'mirai_games_test') {
+            throw new PDOException(
+                'Test environment requires MYSQL_DATABASE=mirai_games_test.'
+            );
+        }
+
+        $database = $configuredDatabase;
+    } else {
+        $database = $configuredDatabase ?: 'mirai_games';
+    }
+
     $host = getenv('MYSQL_HOST') ?: '127.0.0.1';
     $port = getenv('MYSQL_PORT') ?: '3306';
-    $database = getenv('MYSQL_DATABASE') ?: 'mirai_games';
     $username = getenv('MYSQL_USER');
     $password = getenv('MYSQL_PASSWORD');
 

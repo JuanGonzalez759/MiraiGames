@@ -6,8 +6,30 @@ require_once __DIR__ . '/../controllers/gamesController.php';
 require_once __DIR__ . '/../controllers/authController.php';
 require_once __DIR__ . '/../controllers/cartController.php';
 require_once __DIR__ . '/../controllers/ordersController.php';
+require_once __DIR__ . '/../controllers/adminController.php';
 
 return [
+    'GET /api/admin/games' => static function (): array {
+        return getAdminGames();
+    },
+    'POST /api/admin/games' => static function (): ApiResponse {
+        return createAdminGameEndpoint();
+    },
+    'PATCH /api/admin/games/{id}' => static function (array $parameters): array {
+        return updateAdminGameEndpoint($parameters);
+    },
+    'DELETE /api/admin/games/{id}' => static function (array $parameters): array {
+        return deactivateAdminGameEndpoint($parameters);
+    },
+    'POST /api/admin/games/{id}/stock' => static function (array $parameters): array {
+        return adjustAdminGameStockEndpoint($parameters);
+    },
+    'GET /api/admin/orders' => static function (): array {
+        return getAdminOrders();
+    },
+    'GET /api/admin/orders/{id}' => static function (array $parameters): array {
+        return getAdminOrderDetails($parameters);
+    },
     'GET /api/auth/csrf' => static function (): array {
         return getCsrfToken();
     },

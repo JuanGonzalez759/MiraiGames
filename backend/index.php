@@ -9,6 +9,7 @@ require_once __DIR__ . '/config/database.php';
 require_once __DIR__ . '/helpers/httpException.php';
 require_once __DIR__ . '/helpers/response.php';
 require_once __DIR__ . '/helpers/session.php';
+require_once __DIR__ . '/helpers/adminAuthorization.php';
 
 $path = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
 $path = is_string($path) ? rtrim($path, '/') : '/';
@@ -68,6 +69,11 @@ try {
     if (!in_array($method, ['GET', 'HEAD', 'OPTIONS'], true) && !$isStripeWebhook) {
         requireSameOriginRequest();
         startAppSession();
+
+        if (str_starts_with($path, '/api/admin/')) {
+            requireAuthenticatedSessionUserId();
+        }
+
         requireValidCsrfToken();
     }
 
